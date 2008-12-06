@@ -33,7 +33,7 @@ namespace Storm.DataBinders
 						Type t = Type.GetType(typeName, false);
 						if (t == null)
 							throw new StormConfigurationException("DataBinderFacotry can not create an instance of [" + typeName + "]. Type or Assembly may be missing.");
-						if (!t.GetInterface(typeof(IDataBinder).FullName))
+						if (t.GetInterface(typeof(IDataBinder).FullName) == null)
 							throw new StormConfigurationException("DataBinderFacotry can not create an instance of [" + typeName + "]. The Type does not implement IDataBinder.");
 						binder = (IDataBinder)Activator.CreateInstance(t);
 						LoadedDataBinders.Add(typeName, binder);
