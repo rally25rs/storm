@@ -1,29 +1,47 @@
 ﻿using System;
+using System.Reflection;
 
 namespace Storm.Attributes
 {
     /// <summary>
     /// This attribute indicates that the decorated class
     ///  is to be mapped by Storm to a database table.
-    /// The decorated class should contain properties that
-    ///  are decorated with the [StormColumnMapped] attribute.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple=false, Inherited=true)]
-    public class StormTableMappedAttribute : System.Attribute
+    public class StormTableMappedAttribute : ClassLevelMappedAttribute
     {
         public string TableName { get; set; }
 
-        public string DataBinderName { get; set; }
+		// private data loaded during validation
+		private PropertyInfo[] MappedProperties { get; set; }
 
         /// <summary>
         /// Indicate that this class is to be mapped to a table.
         /// </summary>
-        /// <param name="tableName">The name of the table to map to.</param>
-        /// <param name="dataBinder">The fully qualified type name of the Data Binder to use.</param>
-        public StormTableMappedAttribute(string tableName, string dataBinder)
+        public StormTableMappedAttribute() : base()
         {
-            this.TableName = tableName;
-            this.DataBinderName = dataBinder;
         }
+
+		internal override void ValidateMappingPre(Type decoratedType)
+		{
+			// base validation
+			base.ValidateMappingPre(decoratedType);
+			this.PreValidated = false;
+
+			// must have a table nname defined
+			if (this.TableName == null || this.TableName.Length == 0)
+				throw new StormConfigurationException("Invalid Table mapping on Type [" + decoratedType.FullName +"]. Must provide a table name.");
+
+			// currently TableMapped only knows how to handle column level mappings of: StormColumnMapped
+			foreach (PropertyInfo prop in decoratedType.GetProperties())
+			{
+				foreach (PropertyLevelMappedAttribute attrib in this.GetPropertyLevelMappingAttributes(prop))
+				{
+					if (attrib.GetType() != typeof(StormColumnMappedAttribute))
+						throw new StormConfigurationException("Invalid mapping on Type [" + decoratedType.FullName + "], Property [" + prop.Name + "]. Table Mapped classes can not contain Properties mapped with this mapping type."); 
+				}
+			}
+
+			this.PreValidated = true;
+		}
     }
 }
