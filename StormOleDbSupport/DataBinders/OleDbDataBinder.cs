@@ -13,7 +13,6 @@ namespace Storm.DataBinders
 	public class OleDbDataBinder : AbstractDataBinder
 	{
 		private DataCache dataCache = null;
-		private bool mappingValidated = false;
 
 		public OleDbDataBinder() : base()
 		{
@@ -22,16 +21,15 @@ namespace Storm.DataBinders
 
 		public override void ValidateMapping(ClassLevelMappedAttribute mapping, IDbConnection connection)
 		{
-			if (this.mappingValidated)
+			if (mapping.DataBinderValidated)
 				return;
 
 			try
 			{
-				if (!(connection is OleDbConnection))
-					throw new StormConfigurationException("DbConnection is not of type OleDbConnection. OleDbDataBinder can not use this connection.");
-				SchemaValidator validator = new SchemaValidator((OleDbConnection)connection);
+				OleDbConnection oleDbConnection = this.VerifyConnection(connection);
+				SchemaValidator validator = new SchemaValidator(oleDbConnection);
 				validator.VerifyMapping(mapping);
-				this.mappingValidated = true;
+				mapping.DataBinderValidated = true;
 			}
 			catch (Exception e)
 			{
@@ -39,40 +37,115 @@ namespace Storm.DataBinders
 			}
 		}
 
-		public override void Load<T>(T instanceToLoad, Storm.Attributes.ClassLevelMappedAttribute mapping, RecordLookupMode lookupMode, IDbConnection connection, bool cascade)
+		public override void Load<T>(T instanceToLoad, Storm.Attributes.ClassLevelMappedAttribute mapping, IDbConnection connection, bool cascade)
 		{
-			OleDbConnection oleDbConnection = this.VerifyConnection(connection);
-			if (oleDbConnection == null)
-				throw new StormPersistenceException("The database connection is not usable, not in the OPEN state, or not an OleDbConnection.");
-			Type mappingType = mapping.GetType();
-			if(mappingType == typeof(StormTableMappedAttribute))
+			try
 			{
-				var mapper = new TableMapper();
-				mapper.PerformLoad(instanceToLoad, (StormTableMappedAttribute)mapping, oleDbConnection, lookupMode, dataCache);
+				OleDbConnection oleDbConnection = this.VerifyConnection(connection);
+				Type mappingType = mapping.GetType();
+				if (mappingType == typeof(StormTableMappedAttribute))
+				{
+					var mapper = new TableMapper();
+					mapper.PerformLoad(instanceToLoad, (StormTableMappedAttribute)mapping, oleDbConnection, dataCache);
+				}
+				else
+				{
+					throw new StormPersistenceException("Storm OleDbDataBinder does not support the mapping [" + mapping.GetType().FullName + "].");
+				}
 			}
-			else
+			catch (Exception e)
 			{
-				throw new StormPersistenceException("Storm JetDataBinder does not support the mapping [" + mapping.GetType().FullName + "].");
+				throw new StormPersistenceException("Unable to Load instance of type [" + instanceToLoad.GetType().FullName + "].", e);
 			}
 		}
 
-		public override void Persist<T>(T instanceToPersist, Storm.Attributes.ClassLevelMappedAttribute mapping, IDbConnection connection)
+		public override List<T> BatchLoad<T>(T instanceToLoad, Storm.Attributes.ClassLevelMappedAttribute mapping, IDbConnection connection, bool cascade)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				OleDbConnection oleDbConnection = this.VerifyConnection(connection);
+				Type mappingType = mapping.GetType();
+				if (mappingType == typeof(StormTableMappedAttribute))
+				{
+					var mapper = new TableMapper();
+					return mapper.PerformBatchLoad(instanceToLoad, (StormTableMappedAttribute)mapping, oleDbConnection, dataCache);
+				}
+				else
+				{
+					throw new StormPersistenceException("Storm OleDbDataBinder does not support the mapping [" + mapping.GetType().FullName + "].");
+				}
+			}
+			catch (Exception e)
+			{
+				throw new StormPersistenceException("Unable to Load instance of type [" + instanceToLoad.GetType().FullName + "].", e);
+			}
 		}
 
-		public override void BatchPersist<T>(List<T> listToPersist, IDbConnection connection)
+		public override void Persist<T>(T instanceToPersist, Storm.Attributes.ClassLevelMappedAttribute mapping, IDbConnection connection, bool cascade)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				OleDbConnection oleDbConnection = this.VerifyConnection(connection);
+				if (oleDbConnection == null)
+					throw new StormPersistenceException("The database connection is not usable, not in the OPEN state, or not an OleDbConnection.");
+				Type mappingType = mapping.GetType();
+				if (mappingType == typeof(StormTableMappedAttribute))
+				{
+					var mapper = new TableMapper();
+					mapper.PerformPersist(instanceToPersist, (StormTableMappedAttribute)mapping, oleDbConnection, dataCache);
+				}
+				else
+				{
+					throw new StormPersistenceException("Storm OleDbDataBinder does not support the mapping [" + mapping.GetType().FullName + "].");
+				}
+			}
+			catch (Exception e)
+			{
+				throw new StormPersistenceException("Unable to Persist instance of type [" + instanceToPersist.GetType().FullName + "].", e);
+			}
+		}
+
+		public override void BatchPersist<T>(List<T> listToPersist, IDbConnection connection, bool cascade)
+		{
+			try
+			{
+				throw new NotImplementedException();
+			}
+			catch (Exception e)
+			{
+				throw new StormPersistenceException("Unable to Persist instance of type [" + typeof(T).FullName + "].", e);
+			}
+		}
+
+		public override void Delete<T>(T instanceToDelete, ClassLevelMappedAttribute mapping, IDbConnection connection, bool cascade)
+		{
+			try
+			{
+				OleDbConnection oleDbConnection = this.VerifyConnection(connection);
+				Type mappingType = mapping.GetType();
+				if (mappingType == typeof(StormTableMappedAttribute))
+				{
+					var mapper = new TableMapper();
+					mapper.PerformDelete(instanceToDelete, (StormTableMappedAttribute)mapping, oleDbConnection, dataCache);
+				}
+				else
+				{
+					throw new StormPersistenceException("Storm OleDbDataBinder does not support the mapping [" + mapping.GetType().FullName + "].");
+				}
+			}
+			catch (Exception e)
+			{
+				throw new StormPersistenceException("Unable to Delete instance of type [" + instanceToDelete.GetType().FullName + "].", e);
+			}
 		}
 
 		private OleDbConnection VerifyConnection(IDbConnection connection)
 		{
 			OleDbConnection oleDbConnection = connection as OleDbConnection;
 			if (oleDbConnection == null)
-				return null;
+				throw new StormPersistenceException("The database connection is null or not an OleDbConnection.");
 			if (oleDbConnection.State != ConnectionState.Open)
-				return null;
+				throw new StormPersistenceException("The database connection is not in the OPEN state.");
 			return oleDbConnection;
 		}
 	}

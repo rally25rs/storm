@@ -9,9 +9,9 @@ namespace Storm.DataBinders.OleDb
 	internal sealed class DataCacheItem
 	{
 		internal OleDbCommand SelectCommand { get; set; }
-		internal string InsertQuery { get; set; }
-		internal string UpdateQuery { get; set; }
-		internal string DeleteQuery { get; set; }
-		internal string ExistsQuery { get; set; }
+		internal OleDbCommand InsertCommand { get; set; }
+		internal OleDbCommand UpdateCommand { get; set; }
+		internal OleDbCommand DeleteCommand { get; set; }
+		internal OleDbCommand ExistsCommand { get; set; }
 	}
 }

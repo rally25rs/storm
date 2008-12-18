@@ -34,11 +34,22 @@ namespace Storm.DataBinders
 		/// <typeparam name="T">The type decorated with ClassLevelMappedAttribute</typeparam>
 		/// <param name="instanceToLoad">An instance of the class to populate. All key properties must be populated.</param>
 		/// <param name="mapping">The mapping attribute attached to the instance.</param>
-		/// <param name="lookupMode">The lookup mode to use.</param>
 		/// <param name="connection">The Database Connection to run against.</param>
 		/// <param name="cascade">Whether or not to cascade the load (recursive load). If true, any properties that are mapped to other mapped objects will also be loaded.</param>
 		/// <returns>Returns the loaded instance. Same as what was passed in.</returns>
-		void Load<T>(T instanceToLoad, ClassLevelMappedAttribute mapping, RecordLookupMode lookupMode, IDbConnection connection, bool cascade);
+		void Load<T>(T instanceToLoad, ClassLevelMappedAttribute mapping, IDbConnection connection, bool cascade);
+
+		/// <summary>
+		/// Take an instance of a Storm mapped class and load a list of matching objects
+		/// from the DB. Uses all non-null mapped properties in the object to query on.
+		/// </summary>
+		/// <typeparam name="T">A Storm mapped type.</typeparam>
+		/// <param name="instanceToLoad">An instance of the class to populate. All key properties must be populated.</param>
+		/// <param name="mapping">The mapping attribute attached to the instance.</param>
+		/// <param name="connection">The Database Connection to run against.</param>
+		/// <param name="cascade">Whether or not to cascade the load (recursive load). If true, any properties that are mapped to other mapped objects will also be loaded.</param>
+		/// <returns>Returns a List of loaded instances.</returns>
+		List<T> BatchLoad<T>(T instanceToLoad, ClassLevelMappedAttribute mapping, IDbConnection connection, bool cascade);
 
         /// <summary>
         /// Take an instance of a Storm mapped class and load the

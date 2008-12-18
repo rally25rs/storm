@@ -8,7 +8,7 @@ namespace Storm.DataBinders.OleDb
 {
 	internal sealed class TableMapper
 	{
-		public void PerformLoad<T>(T instanceToLoad, StormTableMappedAttribute mapping, OleDbConnection connection, RecordLookupMode lookupMode, DataCache dataCache)
+		public void PerformLoad<T>(T instanceToLoad, StormTableMappedAttribute mapping, OleDbConnection connection, DataCache dataCache)
 		{
 			ColumnMapper columnMapper = new ColumnMapper();
 
@@ -27,8 +27,6 @@ namespace Storm.DataBinders.OleDb
 
 			// build and execute query
 			var cmd = cachedData.SelectCommand;
-			if (lookupMode == RecordLookupMode.LookupByNonNullProperties)
-				cmd = CommandBuilder.CreateSelectCommandForNonNull(mapping);
 			try
 			{
 				cmd.Connection = connection;
@@ -39,14 +37,12 @@ namespace Storm.DataBinders.OleDb
 						if ((attrib.SupressEvents & StormPersistenceEvents.Load) != StormPersistenceEvents.Load)
 						{
 							object value = attrib.AttachedTo.GetValue(instanceToLoad, null);
-							if (lookupMode == RecordLookupMode.LookupByKeys && ((StormColumnMappedAttribute)attrib).PrimaryKey)
+							if (((StormColumnMappedAttribute)attrib).PrimaryKey)
 							{
 								if (value == null)
 									throw new StormPersistenceException("Property [" + attrib.AttachedTo.Name + "] is a primary key, but its value is null.");
 								cmd.Parameters[((StormColumnMappedAttribute)attrib).ColumnName].Value = value;
 							}
-							else if (lookupMode == RecordLookupMode.LookupByNonNullProperties && value != null)
-								cmd.Parameters[((StormColumnMappedAttribute)attrib).ColumnName].Value = value;
 						}
 					}
 				}
@@ -72,75 +68,229 @@ namespace Storm.DataBinders.OleDb
 			}
 		}
 
-		private void BuildQueries(StormTableMappedAttribute mapping, DataCacheItem cachedData)
+		public List<T> PerformBatchLoad<T>(T instanceToLoad, StormTableMappedAttribute mapping, OleDbConnection connection, DataCache dataCache)
 		{
-			StringBuilder insert = new StringBuilder("INSERT INTO ");
-			StringBuilder update = new StringBuilder("UPDATE ");
-			StringBuilder delete = new StringBuilder("DELETE FROM ");
-			StringBuilder exists = new StringBuilder("SELECT count(*) FROM ");
+			ColumnMapper columnMapper = new ColumnMapper();
+			List<T> loadedObjects = new List<T>();
 
-			// loop through mapped properties and add them into the queries
-			List<string> keys = new List<string>();
-			StringBuilder keysBuilder = new StringBuilder();
-			StringBuilder columnsBuilder = new StringBuilder();
-			StringBuilder columnsPairsBuilder = new StringBuilder();
-			StringBuilder parametersBuilder = new StringBuilder();
-			foreach (var attrib in mapping.PropertyAttributes)
+			// make sure this action isn't supressed
+			if ((mapping.SupressEvents & StormPersistenceEvents.Load) == StormPersistenceEvents.Load)
+				throw new StormPersistenceException("Unable to load [" + instanceToLoad.GetType().FullName + "]. Load event is supressed.");
+
+			// build and execute query
+			var cmd = CommandBuilder.CreateSelectCommandForNonNull(instanceToLoad, mapping);
+			try
 			{
-				if (attrib.GetType() == typeof(StormColumnMappedAttribute))
+				cmd.Connection = connection;
+				foreach (var attrib in mapping.PropertyAttributes)
 				{
-					StormColumnMappedAttribute column = (StormColumnMappedAttribute)attrib;
-					if ((column.SupressEvents & StormPersistenceEvents.Load) != StormPersistenceEvents.Load)
+					if (attrib.GetType() == typeof(StormColumnMappedAttribute))
 					{
-						if (column.PrimaryKey)
+						if ((attrib.SupressEvents & StormPersistenceEvents.Load) != StormPersistenceEvents.Load)
 						{
-							keys.Add(column.ColumnName);
-							if (keysBuilder.Length > 0)
-								keysBuilder.Append(" AND ");
-							keysBuilder.Append(column.ColumnName).Append(" = :").Append(column.ColumnName);
-						}
-						else
-						{
-							if (columnsBuilder.Length > 0)
-								columnsBuilder.Append(", ");
-							columnsBuilder.Append(column.ColumnName);
-							if (columnsPairsBuilder.Length > 0)
-								columnsPairsBuilder.Append(", ");
-							columnsPairsBuilder.Append(column.ColumnName).Append(" = :").Append(column.ColumnName);
-							if (parametersBuilder.Length > 0)
-								parametersBuilder.Append(", ");
-							parametersBuilder.Append(":").Append(column.ColumnName);
+							object value = attrib.AttachedTo.GetValue(instanceToLoad, null);
+							if (value != null)
+								cmd.Parameters[((StormColumnMappedAttribute)attrib).ColumnName].Value = value;
 						}
 					}
 				}
+				using (OleDbDataReader reader = cmd.ExecuteReader())
+				{
+					// map results to objects
+					if (!reader.HasRows)
+						throw new StormPersistenceException("Unable to load instance of [" + instanceToLoad.GetType().FullName + "]. No data returned from DB.");
+					while (reader.Read())
+					{
+						T objToLoad = Activator.CreateInstance<T>();
+						foreach (var attrib in mapping.PropertyAttributes)
+						{
+							if (attrib.GetType() == typeof(StormColumnMappedAttribute))
+							{
+								columnMapper.MapResult(objToLoad, (StormColumnMappedAttribute)attrib, reader);
+							}
+						}
+						loadedObjects.Add(objToLoad);
+					}
+					reader.Close();
+				}
+			}
+			finally
+			{
+				cmd.ClearData();
+			}
+			loadedObjects.TrimExcess();
+			return loadedObjects;
+		}
+
+		public void PerformPersist<T>(T instanceToLoad, StormTableMappedAttribute mapping, OleDbConnection connection, DataCache dataCache)
+		{
+			// check the data cache for info about this mapping
+			DataCacheItem cachedData = dataCache.Get(instanceToLoad.GetType());
+			if (cachedData == null)
+			{
+				cachedData = new DataCacheItem();
+				this.BuildQueries(mapping, cachedData);
+				dataCache.Add(instanceToLoad.GetType(), cachedData);
 			}
 
-			update.Append(mapping.TableName).Append(" SET ").Append(columnsPairsBuilder.ToString()).Append(" WHERE ").Append(keysBuilder.ToString());
-			delete.Append(mapping.TableName).Append(" WHERE ").Append(keysBuilder.ToString());
-			exists.Append(mapping.TableName).Append(" WHERE ").Append(keysBuilder.ToString());
-			insert.Append(mapping.TableName).Append(" (");
-			for (int i = 0; i < keys.Count; i++)
-			{
-				if (i > 0)
-					insert.Append(", ");
-				insert.Append(keys[i]);
-			}
-			insert.Append(columnsBuilder.ToString()).Append(") VALUES (");
-			for (int i = 0; i < keys.Count; i++)
-			{
-				if (i > 0)
-					insert.Append(", ");
-				insert.Append(":").Append(keys[i]);
-			}
-			if (keys.Count > 0)
-				insert.Append(", ");
-			insert.Append(parametersBuilder.ToString()).Append(")");
+			// see if this data already exists, so we know if we are going to insert or update.
+			if (this.PerformExists(instanceToLoad, mapping, connection, cachedData.ExistsCommand))
+				this.PerformUpdate(instanceToLoad, mapping, connection, cachedData.UpdateCommand);
+			else
+				this.PerformInsert(instanceToLoad, mapping, connection, cachedData.InsertCommand);
 
+		}
+
+		public void PerformDelete<T>(T instanceToDelete, StormTableMappedAttribute mapping, OleDbConnection connection, DataCache dataCache)
+		{
+			// make sure this action isn't supressed
+			if ((mapping.SupressEvents & StormPersistenceEvents.Delete) == StormPersistenceEvents.Delete)
+				throw new StormPersistenceException("Unable to delete [" + instanceToDelete.GetType().FullName + "]. Delete event is supressed.");
+
+			// check the data cache for info about this mapping
+			DataCacheItem cachedData = dataCache.Get(instanceToDelete.GetType());
+			if (cachedData == null)
+			{
+				cachedData = new DataCacheItem();
+				this.BuildQueries(mapping, cachedData);
+				dataCache.Add(instanceToDelete.GetType(), cachedData);
+			}
+
+			// build and execute query
+			var cmd = cachedData.DeleteCommand;
+			try
+			{
+				cmd.Connection = connection;
+				foreach (var attrib in mapping.PropertyAttributes)
+				{
+					if (attrib.GetType() == typeof(StormColumnMappedAttribute))
+					{
+						if ((attrib.SupressEvents & StormPersistenceEvents.Load) != StormPersistenceEvents.Load)
+						{
+							object value = attrib.AttachedTo.GetValue(instanceToDelete, null);
+							if (((StormColumnMappedAttribute)attrib).PrimaryKey)
+							{
+								if (value == null)
+									throw new StormPersistenceException("Property [" + attrib.AttachedTo.Name + "] is a primary key, but its value is null.");
+								cmd.Parameters[((StormColumnMappedAttribute)attrib).ColumnName].Value = value;
+							}
+						}
+					}
+				}
+				cmd.ExecuteScalar();
+			}
+			finally
+			{
+				cmd.ClearData();
+			}
+		}
+
+		private void PerformInsert(object instanceToLoad, StormTableMappedAttribute mapping, OleDbConnection connection, OleDbCommand cmd)
+		{
+			// make sure this action isn't supressed
+			if ((mapping.SupressEvents & StormPersistenceEvents.Insert) == StormPersistenceEvents.Insert)
+				throw new StormPersistenceException("Unable to insert [" + instanceToLoad.GetType().FullName + "]. Insert event is supressed.");
+
+			// build and execute query
+			try
+			{
+				cmd.Connection = connection;
+				foreach (var attrib in mapping.PropertyAttributes)
+				{
+					if (attrib.GetType() == typeof(StormColumnMappedAttribute))
+					{
+						if ((attrib.SupressEvents & StormPersistenceEvents.Insert) != StormPersistenceEvents.Insert)
+						{
+							object value = attrib.AttachedTo.GetValue(instanceToLoad, null) ?? System.DBNull.Value;
+							if (((StormColumnMappedAttribute)attrib).PrimaryKey && value == System.DBNull.Value)
+							{
+								throw new StormPersistenceException("Property [" + attrib.AttachedTo.Name + "] is a primary key, but its value is null.");
+							}
+							cmd.Parameters[((StormColumnMappedAttribute)attrib).ColumnName].Value = value;
+						}
+					}
+				}
+				object result = cmd.ExecuteScalar();
+			}
+			finally
+			{
+				cmd.ClearData();
+			}
+		}
+
+		private void PerformUpdate(object instanceToLoad, StormTableMappedAttribute mapping, OleDbConnection connection, OleDbCommand cmd)
+		{
+			// make sure this action isn't supressed
+			if ((mapping.SupressEvents & StormPersistenceEvents.Update) == StormPersistenceEvents.Update)
+				throw new StormPersistenceException("Unable to update [" + instanceToLoad.GetType().FullName + "]. Update event is supressed.");
+
+			// build and execute query
+			try
+			{
+				cmd.Connection = connection;
+				foreach (var attrib in mapping.PropertyAttributes)
+				{
+					if (attrib.GetType() == typeof(StormColumnMappedAttribute))
+					{
+						if ((attrib.SupressEvents & StormPersistenceEvents.Update) != StormPersistenceEvents.Update)
+						{
+							object value = attrib.AttachedTo.GetValue(instanceToLoad, null) ?? System.DBNull.Value;
+							if (((StormColumnMappedAttribute)attrib).PrimaryKey && value == System.DBNull.Value)
+							{
+								throw new StormPersistenceException("Property [" + attrib.AttachedTo.Name + "] is a primary key, but its value is null.");
+							}
+							cmd.Parameters[((StormColumnMappedAttribute)attrib).ColumnName].Value = value;
+						}
+					}
+				}
+				object result = cmd.ExecuteScalar();
+			}
+			finally
+			{
+				cmd.ClearData();
+			}
+		}
+
+		private bool PerformExists<T>(T instanceToLoad, StormTableMappedAttribute mapping, OleDbConnection connection, OleDbCommand cmd)
+		{
+			bool exists = false;
+			try
+			{
+				cmd.Connection = connection;
+				foreach (var attrib in mapping.PropertyAttributes)
+				{
+					if (attrib.GetType() == typeof(StormColumnMappedAttribute))
+					{
+						if ((attrib.SupressEvents & StormPersistenceEvents.Load) != StormPersistenceEvents.Load)
+						{
+							object value = attrib.AttachedTo.GetValue(instanceToLoad, null);
+							if (((StormColumnMappedAttribute)attrib).PrimaryKey)
+							{
+								if (value == null)
+									throw new StormPersistenceException("Property [" + attrib.AttachedTo.Name + "] is a primary key, but its value is null.");
+								cmd.Parameters[((StormColumnMappedAttribute)attrib).ColumnName].Value = value;
+							}
+						}
+					}
+				}
+				object result = cmd.ExecuteScalar();
+				if (((result as int?) ?? 0) > 0)
+					exists = true;
+			}
+			finally
+			{
+				cmd.ClearData();
+			}
+			return exists;
+		}
+
+		private void BuildQueries(StormTableMappedAttribute mapping, DataCacheItem cachedData)
+		{
 			cachedData.SelectCommand = CommandBuilder.CreateSelectCommandForKeys(mapping);
-			cachedData.InsertQuery = insert.ToString();
-			cachedData.UpdateQuery = update.ToString();
-			cachedData.DeleteQuery = delete.ToString();
-			cachedData.ExistsQuery = exists.ToString();
+			cachedData.InsertCommand = CommandBuilder.CreateInsertCommand(mapping);
+			cachedData.UpdateCommand = CommandBuilder.CreateUpdateCommand(mapping);
+			cachedData.DeleteCommand = CommandBuilder.CreateDeleteCommand(mapping);
+			cachedData.ExistsCommand = CommandBuilder.CreateExistsCommand(mapping);
 		}
 	}
 }

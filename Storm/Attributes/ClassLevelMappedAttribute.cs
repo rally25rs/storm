@@ -19,10 +19,12 @@ namespace Storm.Attributes
 		public Type AttachedTo { get; set; }
 		public List<PropertyLevelMappedAttribute> PropertyAttributes { get; set; }
 		protected bool PreValidated { get; set; }
+		public bool DataBinderValidated { get; set; }
 
 		protected ClassLevelMappedAttribute()
 		{
 			this.PreValidated = false;
+			this.DataBinderValidated = false;
 		}
 
 		protected ClassLevelMappedAttribute GetClassLevelMappingAttribute(Type T)
