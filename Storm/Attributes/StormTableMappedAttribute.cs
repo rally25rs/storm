@@ -21,10 +21,10 @@ namespace Storm.Attributes
         {
         }
 
-		internal override void ValidateMappingPre(Type decoratedType)
+		internal override void ValidateMapping(Type decoratedType)
 		{
 			// base validation
-			base.ValidateMappingPre(decoratedType);
+			base.ValidateMapping(decoratedType);
 			this.PreValidated = false;
 
 			// must have a table nname defined

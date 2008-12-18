@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using System.Data;
 
 namespace Storm.Attributes
 {
@@ -12,9 +13,6 @@ namespace Storm.Attributes
     {
         public string ColumnName { get; set; }
 		public bool PrimaryKey { get; set; }
-
-		// private data determined during validation
-		private Type DatastoreType { get; set; }
 
         /// <summary>
         /// Indicates that this property is to be mapped to a table column.

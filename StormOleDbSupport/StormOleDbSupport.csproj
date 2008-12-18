@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Storm</RootNamespace>
-    <AssemblyName>StormJetSupport</AssemblyName>
+    <AssemblyName>StormOleDbSupport</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -57,8 +57,11 @@
     <Compile Include="DataBinders\OleDb\ColumnMapper.cs" />
     <Compile Include="DataBinders\OleDb\DataCache.cs" />
     <Compile Include="DataBinders\OleDb\DataCacheItem.cs" />
+    <Compile Include="DataBinders\OleDb\DbCommandExtensions.cs" />
     <Compile Include="DataBinders\OleDb\DbTypeMap.cs" />
+    <Compile Include="DataBinders\OleDb\CommandBuilder.cs" />
     <Compile Include="DataBinders\OleDb\TableMapper.cs" />
+    <Compile Include="DataBinders\OleDb\Validation\SchemaValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -6,7 +6,7 @@ using Storm.Attributes;
 
 namespace TestApp.Classes
 {
-	[StormTableMapped(TableName="BICYCLES", DataBinder="oledbBinder")]
+	[StormTableMapped(TableName="BICYCLES", DataBinder="Storm.DataBinders.OleDbDataBinder, StormOleDbSupport")]
 	class Bicycle
 	{
 		[StormColumnMapped(ColumnName="NAME", PrimaryKey=true)]

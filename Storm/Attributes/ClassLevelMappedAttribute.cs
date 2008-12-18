@@ -19,12 +19,10 @@ namespace Storm.Attributes
 		public Type AttachedTo { get; set; }
 		public List<PropertyLevelMappedAttribute> PropertyAttributes { get; set; }
 		protected bool PreValidated { get; set; }
-		protected bool PostValidated { get; set; }
 
 		protected ClassLevelMappedAttribute()
 		{
 			this.PreValidated = false;
-			this.PostValidated = false;
 		}
 
 		protected ClassLevelMappedAttribute GetClassLevelMappingAttribute(Type T)
@@ -49,7 +47,7 @@ namespace Storm.Attributes
 		/// </summary>
 		/// <param name="decoratedType">The Type that is mapped by this attribute.</param>
 		/// <exception cref="StormConfigurationException">If mapping is invalid.</exception>
-		internal virtual void ValidateMappingPre(Type decoratedType)
+		internal virtual void ValidateMapping(Type decoratedType)
 		{
 			if (this.PreValidated)
 				return;
@@ -83,22 +81,6 @@ namespace Storm.Attributes
 			}
 
 			this.PreValidated = true;
-		}
-
-		/// <summary>
-		/// Validates as object's mapping after executing a query.
-		/// Typically check that types properly map, and columns actually exist.
-		/// </summary>
-		/// <typeparam name="T"></typeparam>
-		/// <param name="decoratedType">The Type whose mapping is being validated.</param>
-		/// <param name="schemaInfo">Some object that contains the data source's layout.</param>
-		/// <exception cref="StormConfigurationException">If mapping is invalid.</exception>
-		internal virtual void ValidateMappingPost<T>(Type decoratedType, T schemaInfo)
-		{
-			if (this.PostValidated)
-				return;
-
-			this.PostValidated = true;
 		}
 	}
 }

@@ -44,6 +44,7 @@ namespace Storm.DataBinders.OleDb
 			}
 			if(DBTYPE_TO_TYPE_MAP == null)
 			{
+				// taken from: http://msdn.microsoft.com/en-us/library/system.data.oledb.oledbtype.aspx
 				DBTYPE_TO_TYPE_MAP = new Dictionary<OleDbType, Type>();
 				DBTYPE_TO_TYPE_MAP.Add(OleDbType.BigInt, typeof(Int64));
 				DBTYPE_TO_TYPE_MAP.Add(OleDbType.Binary, typeof(byte[]));
@@ -75,6 +76,29 @@ namespace Storm.DataBinders.OleDb
 				DBTYPE_TO_TYPE_MAP.Add(OleDbType.VarNumeric, typeof(decimal));
 				DBTYPE_TO_TYPE_MAP.Add(OleDbType.VarWChar, typeof(string));
 				DBTYPE_TO_TYPE_MAP.Add(OleDbType.WChar, typeof(string));
+			}
+		}
+
+		internal static int GetDbTypeSize(OleDbType oleDbType)
+		{
+			switch (oleDbType)
+			{
+				case OleDbType.Boolean:
+					return 1;
+				case OleDbType.SmallInt:
+					return 2;
+				case OleDbType.Integer:
+					return 4;
+				case OleDbType.BigInt:
+					return 8;
+				case OleDbType.Decimal:
+					return 16;
+				case OleDbType.VarChar:
+				case OleDbType.Char:
+				case OleDbType.Binary:
+					return 2048;
+				default:
+					return 0;
 			}
 		}
 	}

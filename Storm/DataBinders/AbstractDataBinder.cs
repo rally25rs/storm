@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Storm.Attributes;
+using System.Data;
 
 namespace Storm.DataBinders
 {
@@ -21,11 +22,18 @@ namespace Storm.DataBinders
 
 		#region IDataBinder Members
 
-		public abstract void Load<T>(T instanceToLoad, ClassLevelMappedAttribute mapping);
+		public virtual void ValidateMapping(ClassLevelMappedAttribute mapping, IDbConnection connection)
+		{
+			return;
+		}
 
-		public abstract void Persist<T>(T instanceToPersist, ClassLevelMappedAttribute mapping);
+		public abstract void Load<T>(T instanceToLoad, ClassLevelMappedAttribute mapping, RecordLookupMode lookupMode, IDbConnection connection, bool cascade);
 
-		public abstract void BatchPersist<T>(List<T> listToPersist);
+		public abstract void Persist<T>(T instanceToPersist, ClassLevelMappedAttribute mapping, IDbConnection connection, bool cascade);
+
+		public abstract void BatchPersist<T>(List<T> listToPersist, IDbConnection connection, bool cascade);
+
+		public abstract void Delete<T>(T instanceToDelete, ClassLevelMappedAttribute mapping, IDbConnection connection, bool cascade);
 
 		#endregion
 	}

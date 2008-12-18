@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Storm", "Storm\Storm.csproj", "{1AE02769-CF86-4812-B15C-7D4FABE092BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StormOleDbSupport", "StormJetSupport\StormOleDbSupport.csproj", "{8D46DC5B-69C9-4044-832B-B79C3584E515}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StormOleDbSupport", "StormOleDbSupport\StormOleDbSupport.csproj", "{8D46DC5B-69C9-4044-832B-B79C3584E515}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{13A024E0-D3BD-4F32-B489-AAC0F0C6A648}"
 EndProject

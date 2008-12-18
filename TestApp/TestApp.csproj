@@ -31,6 +31,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="nunit.framework, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -46,11 +47,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\Bicycle.cs" />
+    <Compile Include="PlayFixture.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\StormJetSupport\StormOleDbSupport.csproj">
+    <ProjectReference Include="..\StormOleDbSupport\StormOleDbSupport.csproj">
       <Project>{8D46DC5B-69C9-4044-832B-B79C3584E515}</Project>
       <Name>StormOleDbSupport</Name>
     </ProjectReference>

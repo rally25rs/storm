@@ -12,14 +12,14 @@ namespace TestApp
 	{
 		static void Main(string[] args)
 		{
+			OleDbConnection conn = null;
 			try
 			{
-				OleDbConnection conn = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\\Work\\Storm\\Testing\\StormTest.mdb");
-				Storm.DataBinders.OleDbDataBinder binder = new Storm.DataBinders.OleDbDataBinder(conn);
-				StormMapper.RegisterDataBinder("oledbBinder", binder);
+				conn = new OleDbConnection("Provider=Microsoft.Jet.OLEDB.4.0;Data Source=C:\\Work\\Storm\\Testing\\StormTest.mdb");
+				conn.Open();
 				Bicycle bicycle = new Bicycle();
 				bicycle.Name = "The Diablo";
-				StormMapper.Load(bicycle);
+				StormMapper.Load(bicycle, conn);
 				Console.WriteLine("----------");
 				Console.WriteLine("Bicycle");
 				Console.WriteLine("----------");
@@ -33,6 +33,11 @@ namespace TestApp
 			{
 				Console.WriteLine(e.Message);
 				Console.WriteLine(e.StackTrace);
+			}
+			finally
+			{
+				if (conn != null)
+					conn.Close();
 			}
 		}
 	}

@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Data.OleDb;
 
 namespace Storm.DataBinders.OleDb
 {
@@ -10,7 +8,7 @@ namespace Storm.DataBinders.OleDb
 	/// </summary>
 	internal sealed class DataCacheItem
 	{
-		internal string SelectQuery { get; set; }
+		internal OleDbCommand SelectCommand { get; set; }
 		internal string InsertQuery { get; set; }
 		internal string UpdateQuery { get; set; }
 		internal string DeleteQuery { get; set; }

@@ -1,0 +1,14 @@
+C:\Work\Storm\StormJetSupport\bin\Debug\StormJetSupport.dll
+C:\Work\Storm\StormJetSupport\bin\Debug\StormJetSupport.pdb
+C:\Work\Storm\StormJetSupport\bin\Debug\Storm.dll
+C:\Work\Storm\StormJetSupport\bin\Debug\Storm.pdb
+C:\Work\Storm\StormJetSupport\obj\Debug\ResolveAssemblyReference.cache
+C:\Work\Storm\StormJetSupport\obj\Debug\StormJetSupport.dll
+C:\Work\Storm\StormJetSupport\obj\Debug\StormJetSupport.pdb
+C:\Work\Storm\StormOleDbSupport\bin\Debug\StormOleDbSupport.dll
+C:\Work\Storm\StormOleDbSupport\bin\Debug\StormOleDbSupport.pdb
+C:\Work\Storm\StormOleDbSupport\bin\Debug\Storm.dll
+C:\Work\Storm\StormOleDbSupport\bin\Debug\Storm.pdb
+C:\Work\Storm\StormOleDbSupport\obj\Debug\ResolveAssemblyReference.cache
+C:\Work\Storm\StormOleDbSupport\obj\Debug\StormOleDbSupport.dll
+C:\Work\Storm\StormOleDbSupport\obj\Debug\StormOleDbSupport.pdb

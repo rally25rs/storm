@@ -8,7 +8,7 @@ namespace Storm.DataBinders.OleDb
 {
 	internal sealed class TableMapper
 	{
-		public void PerformLoad<T>(T instanceToLoad, StormTableMappedAttribute mapping, OleDbConnection connection, DataCache dataCache)
+		public void PerformLoad<T>(T instanceToLoad, StormTableMappedAttribute mapping, OleDbConnection connection, RecordLookupMode lookupMode, DataCache dataCache)
 		{
 			ColumnMapper columnMapper = new ColumnMapper();
 
@@ -26,16 +26,28 @@ namespace Storm.DataBinders.OleDb
 			}
 
 			// build and execute query
-			var cmd = connection.CreateCommand();
-			cmd.CommandType = System.Data.CommandType.Text;
-			cmd.CommandText = cachedData.SelectQuery;
+			var cmd = cachedData.SelectCommand;
+			if (lookupMode == RecordLookupMode.LookupByNonNullProperties)
+				cmd = CommandBuilder.CreateSelectCommandForNonNull(mapping);
 			try
 			{
+				cmd.Connection = connection;
 				foreach (var attrib in mapping.PropertyAttributes)
 				{
 					if (attrib.GetType() == typeof(StormColumnMappedAttribute))
 					{
-						columnMapper.AddParameter(instanceToLoad, (StormColumnMappedAttribute)attrib, cmd);
+						if ((attrib.SupressEvents & StormPersistenceEvents.Load) != StormPersistenceEvents.Load)
+						{
+							object value = attrib.AttachedTo.GetValue(instanceToLoad, null);
+							if (lookupMode == RecordLookupMode.LookupByKeys && ((StormColumnMappedAttribute)attrib).PrimaryKey)
+							{
+								if (value == null)
+									throw new StormPersistenceException("Property [" + attrib.AttachedTo.Name + "] is a primary key, but its value is null.");
+								cmd.Parameters[((StormColumnMappedAttribute)attrib).ColumnName].Value = value;
+							}
+							else if (lookupMode == RecordLookupMode.LookupByNonNullProperties && value != null)
+								cmd.Parameters[((StormColumnMappedAttribute)attrib).ColumnName].Value = value;
+						}
 					}
 				}
 				using (OleDbDataReader reader = cmd.ExecuteReader())
@@ -56,13 +68,12 @@ namespace Storm.DataBinders.OleDb
 			}
 			finally
 			{
-				cmd.Dispose();
+				cmd.ClearData();
 			}
 		}
 
 		private void BuildQueries(StormTableMappedAttribute mapping, DataCacheItem cachedData)
 		{
-			StringBuilder select = new StringBuilder("SELECT ");
 			StringBuilder insert = new StringBuilder("INSERT INTO ");
 			StringBuilder update = new StringBuilder("UPDATE ");
 			StringBuilder delete = new StringBuilder("DELETE FROM ");
@@ -104,7 +115,6 @@ namespace Storm.DataBinders.OleDb
 				}
 			}
 
-			select.Append(columnsBuilder.ToString()).Append(" FROM ").Append(mapping.TableName).Append(" WHERE ").Append(keysBuilder.ToString());
 			update.Append(mapping.TableName).Append(" SET ").Append(columnsPairsBuilder.ToString()).Append(" WHERE ").Append(keysBuilder.ToString());
 			delete.Append(mapping.TableName).Append(" WHERE ").Append(keysBuilder.ToString());
 			exists.Append(mapping.TableName).Append(" WHERE ").Append(keysBuilder.ToString());
@@ -126,7 +136,7 @@ namespace Storm.DataBinders.OleDb
 				insert.Append(", ");
 			insert.Append(parametersBuilder.ToString()).Append(")");
 
-			cachedData.SelectQuery = select.ToString();
+			cachedData.SelectCommand = CommandBuilder.CreateSelectCommandForKeys(mapping);
 			cachedData.InsertQuery = insert.ToString();
 			cachedData.UpdateQuery = update.ToString();
 			cachedData.DeleteQuery = delete.ToString();
