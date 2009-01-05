@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{1AE02769-CF86-4812-B15C-7D4FABE092BE}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -48,6 +48,8 @@
     <Compile Include="Attributes\ClassLevelMappedAttribute.cs" />
     <Compile Include="Attributes\PropertyLevelMappedAttribute.cs" />
     <Compile Include="Attributes\StormColumnMappedAttribute.cs" />
+    <Compile Include="Attributes\StormParameterMappedAttribute.cs" />
+    <Compile Include="Attributes\StormProcedureMappedAttribute.cs" />
     <Compile Include="Attributes\StormTableMappedAttribute.cs" />
     <Compile Include="DataBinders\AbstractDataBinder.cs" />
     <Compile Include="DataBinders\DataBinderFactory.cs" />

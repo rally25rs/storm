@@ -20,5 +20,19 @@ namespace Storm.Attributes
         public StormColumnMappedAttribute() : base()
         {
         }
+
+		internal override void ValidateMapping(PropertyInfo decoratedProperty)
+		{
+			// base validation
+			base.ValidateMapping(decoratedProperty);
+			this.Validated = false;
+
+			// must have a column name defined.
+			// if no name specified, then reuse the Parameter name.
+			if (this.ColumnName == null || this.ColumnName.Length == 0)
+				this.ColumnName = decoratedProperty.Name;
+
+			this.Validated = true;
+		}
 	}
 }

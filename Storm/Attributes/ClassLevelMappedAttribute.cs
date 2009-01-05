@@ -18,12 +18,12 @@ namespace Storm.Attributes
 		public string DataBinder { get; set; }
 		public Type AttachedTo { get; set; }
 		public List<PropertyLevelMappedAttribute> PropertyAttributes { get; set; }
-		protected bool PreValidated { get; set; }
+		protected bool Validated { get; set; }
 		public bool DataBinderValidated { get; set; }
 
 		protected ClassLevelMappedAttribute()
 		{
-			this.PreValidated = false;
+			this.Validated = false;
 			this.DataBinderValidated = false;
 		}
 
@@ -51,7 +51,7 @@ namespace Storm.Attributes
 		/// <exception cref="StormConfigurationException">If mapping is invalid.</exception>
 		internal virtual void ValidateMapping(Type decoratedType)
 		{
-			if (this.PreValidated)
+			if (this.Validated)
 				return;
 
 			this.AttachedTo = decoratedType;
@@ -69,7 +69,7 @@ namespace Storm.Attributes
 				{
 					foreach (PropertyLevelMappedAttribute attrib in this.GetPropertyLevelMappingAttributes(prop))
 					{
-						attrib.ValidateMappingPre(prop);
+						attrib.ValidateMapping(prop);
 						this.PropertyAttributes.Add(attrib);
 					}
 				}
@@ -82,7 +82,7 @@ namespace Storm.Attributes
 				throw;
 			}
 
-			this.PreValidated = true;
+			this.Validated = true;
 		}
 	}
 }

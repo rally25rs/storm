@@ -25,9 +25,9 @@ namespace Storm.Attributes
 		{
 			// base validation
 			base.ValidateMapping(decoratedType);
-			this.PreValidated = false;
+			this.Validated = false;
 
-			// must have a table nname defined
+			// must have a table name defined
 			if (this.TableName == null || this.TableName.Length == 0)
 				throw new StormConfigurationException("Invalid Table mapping on Type [" + decoratedType.FullName +"]. Must provide a table name.");
 
@@ -41,7 +41,7 @@ namespace Storm.Attributes
 				}
 			}
 
-			this.PreValidated = true;
+			this.Validated = true;
 		}
     }
 }

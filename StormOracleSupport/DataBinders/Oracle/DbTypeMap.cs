@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Oracle.DataAccess.Client;
+using Oracle.DataAccess.Types;
 
 namespace Storm.DataBinders.Oracle
 {
@@ -8,6 +9,7 @@ namespace Storm.DataBinders.Oracle
 	{
 		private static Dictionary<Type, OracleDbType> TYPE_TO_DBTYPE_MAP;
 		private static Dictionary<OracleDbType, Type> DBTYPE_TO_TYPE_MAP;
+		private static Dictionary<string, OracleDbType> NAME_TO_DBTYPE_MAP;
 
 		internal static OracleDbType ConvertTypeToDbType(Type t)
 		{
@@ -21,6 +23,69 @@ namespace Storm.DataBinders.Oracle
 			if (DBTYPE_TO_TYPE_MAP == null)
 				LoadDbTypeMaps();
 			return DBTYPE_TO_TYPE_MAP[t];
+		}
+
+		internal static OracleDbType ConvertNameToDbType(string name)
+		{
+			if (NAME_TO_DBTYPE_MAP == null)
+				LoadDbTypeMaps();
+			return NAME_TO_DBTYPE_MAP[name];
+		}
+
+		/// <summary>
+		/// The need for this method is highly annoying.
+		/// When Oracle sets its output parameters, the OracleParameter.Value property
+		///  is set to an internal Oracle type, not its equivelant System type.
+		///  For example, strings are returned as OracleString, DBNull is returned
+		///  as OracleNull, blobs are returned as OracleBinary, etc...
+		///  So these Oracle types need unboxed back to their normal system types.
+		/// </summary>
+		/// <param name="oracleType">Oracle type to unbox.</param>
+		/// <returns></returns>
+		internal static object UnBoxOracleType(object oracleType)
+		{
+			if (oracleType == null)
+				return null;
+
+			Type T = oracleType.GetType();
+			if (T == typeof(OracleString))
+			{
+				if (((OracleString)oracleType).IsNull)
+					return null;
+				return ((OracleString)oracleType).Value;
+			}
+			else if (T == typeof(OracleDecimal))
+			{
+				if (((OracleDecimal)oracleType).IsNull)
+					return null;
+				return ((OracleDecimal)oracleType).Value;
+			}
+			else if (T == typeof(OracleBinary))
+			{
+				if (((OracleBinary)oracleType).IsNull)
+					return null;
+				return ((OracleBinary)oracleType).Value;
+			}
+			else if (T == typeof(OracleBlob))
+			{
+				if (((OracleBlob)oracleType).IsNull)
+					return null;
+				return ((OracleBlob)oracleType).Value;
+			}
+			else if (T == typeof(OracleDate))
+			{
+				if (((OracleDate)oracleType).IsNull)
+					return null;
+				return ((OracleDate)oracleType).Value;
+			}
+			else if (T == typeof(OracleTimeStamp))
+			{
+				if (((OracleTimeStamp)oracleType).IsNull)
+					return null;
+				return ((OracleTimeStamp)oracleType).Value;
+			}
+			else    // not sure how to handle these.
+				return oracleType;
 		}
 
 		private static void LoadDbTypeMaps()
@@ -57,6 +122,19 @@ namespace Storm.DataBinders.Oracle
 				DBTYPE_TO_TYPE_MAP.Add(OracleDbType.Long, typeof(long));
 				DBTYPE_TO_TYPE_MAP.Add(OracleDbType.NVarchar2, typeof(string));
 				DBTYPE_TO_TYPE_MAP.Add(OracleDbType.Varchar2, typeof(string));
+			}
+			if (NAME_TO_DBTYPE_MAP == null)
+			{
+				NAME_TO_DBTYPE_MAP = new Dictionary<string,OracleDbType>();
+				NAME_TO_DBTYPE_MAP.Add("BLOB", OracleDbType.Blob);
+				NAME_TO_DBTYPE_MAP.Add("BYTE", OracleDbType.Byte);
+				NAME_TO_DBTYPE_MAP.Add("CHAR", OracleDbType.Char);
+				NAME_TO_DBTYPE_MAP.Add("DATE", OracleDbType.Date);
+				NAME_TO_DBTYPE_MAP.Add("DECIMAL", OracleDbType.Decimal);
+				NAME_TO_DBTYPE_MAP.Add("DOUBLE", OracleDbType.Double);
+				NAME_TO_DBTYPE_MAP.Add("NUMBER", OracleDbType.Int32);
+				NAME_TO_DBTYPE_MAP.Add("VARCHAR", OracleDbType.Varchar2);
+				NAME_TO_DBTYPE_MAP.Add("VARCHAR2", OracleDbType.Varchar2);
 			}
 		}
 

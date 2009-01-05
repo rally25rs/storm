@@ -49,13 +49,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataBinders\OracleDataBinder.cs" />
-    <Compile Include="DataBinders\Oracle\ColumnMapper.cs" />
+    <Compile Include="DataBinders\Oracle\Mappers\ColumnMapper.cs" />
     <Compile Include="DataBinders\Oracle\CommandBuilder.cs" />
     <Compile Include="DataBinders\Oracle\DataCache.cs" />
     <Compile Include="DataBinders\Oracle\DataCacheItem.cs" />
     <Compile Include="DataBinders\Oracle\DbCommandExtensions.cs" />
     <Compile Include="DataBinders\Oracle\DbTypeMap.cs" />
-    <Compile Include="DataBinders\Oracle\TableMapper.cs" />
+    <Compile Include="DataBinders\Oracle\Mappers\ParameterMapper.cs" />
+    <Compile Include="DataBinders\Oracle\Mappers\ProcedureMapper.cs" />
+    <Compile Include="DataBinders\Oracle\Mappers\TableMapper.cs" />
     <Compile Include="DataBinders\Oracle\Validation\SchemaValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

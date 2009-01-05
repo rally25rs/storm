@@ -14,8 +14,7 @@ namespace Storm.Attributes
 	{
 		public StormPersistenceEvents SupressEvents { get; set; }
 		public PropertyInfo AttachedTo { get; set; }
-		protected bool PreValidated { get; set; }
-		protected bool PostValidated { get; set; }
+		protected bool Validated { get; set; }
 
 		protected PropertyLevelMappedAttribute()
 		{
@@ -26,13 +25,13 @@ namespace Storm.Attributes
 		/// </summary>
 		/// <param name="decoratedProperty">The Property that is mapped by this attribute.</param>
 		/// <exception cref="StormConfigurationException">If mapping is invalid.</exception>
-		internal virtual void ValidateMappingPre(PropertyInfo decoratedProperty)
+		internal virtual void ValidateMapping(PropertyInfo decoratedProperty)
 		{
-			if (this.PreValidated)
+			if (this.Validated)
 				return;
 
 			this.AttachedTo = decoratedProperty;
-			this.PreValidated = true;
+			this.Validated = true;
 		}
 
 	}

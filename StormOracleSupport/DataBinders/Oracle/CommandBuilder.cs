@@ -238,5 +238,33 @@ namespace Storm.DataBinders.Oracle
 
 			return cmd;
 		}
+
+		internal static OracleCommand CreateSelectCommandForProcedure(StormProcedureMappedAttribute mapping)
+		{
+			OracleCommand cmd = new OracleCommand();
+
+			// loop through mapped properties and add them into the parameters
+			foreach (var attrib in mapping.PropertyAttributes)
+			{
+				if (attrib.GetType() == typeof(StormParameterMappedAttribute))
+				{
+					StormParameterMappedAttribute paramAttrib = (StormParameterMappedAttribute)attrib;
+					if ((paramAttrib.SupressEvents & StormPersistenceEvents.Load) != StormPersistenceEvents.Load)
+					{
+						OracleParameter param = cmd.CreateParameter();
+						param.Direction = paramAttrib.ParameterDirection;
+						param.ParameterName = paramAttrib.ParameterName;
+						param.OracleDbType = DbTypeMap.ConvertTypeToDbType(paramAttrib.AttachedTo.PropertyType);
+						param.Size = DbTypeMap.GetDbTypeSize(param.OracleDbType);
+						cmd.Parameters.Add(param);
+					}
+				}
+			}
+
+			cmd.CommandType = System.Data.CommandType.StoredProcedure;
+			cmd.CommandText = mapping.ProcedureName;
+
+			return cmd;
+		}
 	}
 }

@@ -9,6 +9,8 @@ namespace TestApp.Classes
 	[StormTableMapped(TableName="BICYCLES", DataBinder="Storm.DataBinders.OleDbDataBinder, StormOleDbSupport")]
 	class Bicycle
 	{
+		public int Number { get; set; }
+
 		[StormColumnMapped(ColumnName="NAME", PrimaryKey=true)]
 		public string Name { get; set; }
 

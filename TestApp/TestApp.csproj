@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{13A024E0-D3BD-4F32-B489-AAC0F0C6A648}</ProjectGuid>
     <OutputType>Exe</OutputType>
@@ -32,6 +32,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="nunit.framework, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77, processorArchitecture=MSIL" />
+    <Reference Include="Oracle.DataAccess, Version=2.102.2.20, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=x86" />
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -47,6 +48,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\Bicycle.cs" />
+    <Compile Include="Classes\Proc.cs" />
+    <Compile Include="Classes\SalesOrder.cs" />
     <Compile Include="PlayFixture.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -55,6 +58,10 @@
     <ProjectReference Include="..\StormOleDbSupport\StormOleDbSupport.csproj">
       <Project>{8D46DC5B-69C9-4044-832B-B79C3584E515}</Project>
       <Name>StormOleDbSupport</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\StormOracleSupport\StormOracleSupport.csproj">
+      <Project>{1EFD2D9C-B85E-48A3-B758-54C00D284F31}</Project>
+      <Name>StormOracleSupport</Name>
     </ProjectReference>
     <ProjectReference Include="..\Storm\Storm.csproj">
       <Project>{1AE02769-CF86-4812-B15C-7D4FABE092BE}</Project>
