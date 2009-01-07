@@ -19,6 +19,9 @@ namespace Storm.Attributes
 
 		internal override void ValidateMapping(PropertyInfo decoratedProperty)
 		{
+			if (this.Validated)
+				return;
+
 			// base validation
 			base.ValidateMapping(decoratedProperty);
 			this.Validated = false;

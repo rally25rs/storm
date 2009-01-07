@@ -48,6 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\Bicycle.cs" />
+    <Compile Include="Classes\CallReasons.cs" />
     <Compile Include="Classes\Proc.cs" />
     <Compile Include="Classes\SalesOrder.cs" />
     <Compile Include="PlayFixture.cs" />

@@ -14,6 +14,8 @@ namespace Storm.Attributes
 	[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = true)]
 	public abstract class ClassLevelMappedAttribute : Attribute
 	{
+		private bool supportsCascade = false;
+
 		public StormPersistenceEvents SupressEvents { get; set; }
 		public string DataBinder { get; set; }
 		public Type AttachedTo { get; set; }
@@ -21,28 +23,16 @@ namespace Storm.Attributes
 		protected bool Validated { get; set; }
 		public bool DataBinderValidated { get; set; }
 
+		internal bool SupportsCascade
+		{
+			get { return this.supportsCascade; }
+		}
+
 		protected ClassLevelMappedAttribute()
 		{
 			this.Validated = false;
 			this.DataBinderValidated = false;
 		}
-
-		protected ClassLevelMappedAttribute GetClassLevelMappingAttribute(Type T)
-		{
-			object[] attributes = T.GetCustomAttributes(typeof(ClassLevelMappedAttribute), true);
-			if (attributes == null || attributes.Length == 0)
-				return null;
-			return attributes[0] as ClassLevelMappedAttribute;
-		}
-
-		protected PropertyLevelMappedAttribute[] GetPropertyLevelMappingAttributes(PropertyInfo P)
-		{
-			object[] attributes = P.GetCustomAttributes(typeof(PropertyLevelMappedAttribute), true);
-			if (attributes == null || attributes.Length == 0)
-				return null;
-			return attributes as PropertyLevelMappedAttribute[];
-		}
-
 
 		/// <summary>
 		/// Validate an object's mapping before query execution.
@@ -67,10 +57,12 @@ namespace Storm.Attributes
 			{
 				foreach (PropertyInfo prop in propArray)
 				{
-					foreach (PropertyLevelMappedAttribute attrib in this.GetPropertyLevelMappingAttributes(prop))
+					foreach (PropertyLevelMappedAttribute attrib in prop.GetCachedAttributes <PropertyLevelMappedAttribute>(true))
 					{
 						attrib.ValidateMapping(prop);
 						this.PropertyAttributes.Add(attrib);
+						if (attrib is StormRelationMappedAttribute)
+							this.supportsCascade = true;
 					}
 				}
 				this.PropertyAttributes.TrimExcess();

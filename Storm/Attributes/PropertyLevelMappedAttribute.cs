@@ -12,11 +12,13 @@ namespace Storm.Attributes
 	[AttributeUsage(AttributeTargets.Property, AllowMultiple = true, Inherited = true)]
 	public abstract class PropertyLevelMappedAttribute : System.Attribute
 	{
-		public StormPersistenceEvents SupressEvents { get; set; }
 		public PropertyInfo AttachedTo { get; set; }
+
+		public StormPersistenceEvents SupressEvents { get; set; }
+
 		protected bool Validated { get; set; }
 
-		protected PropertyLevelMappedAttribute()
+		protected PropertyLevelMappedAttribute() : base()
 		{
 		}
 

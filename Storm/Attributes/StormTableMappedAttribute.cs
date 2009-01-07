@@ -34,9 +34,9 @@ namespace Storm.Attributes
 			// currently TableMapped only knows how to handle column level mappings of: StormColumnMapped
 			foreach (PropertyInfo prop in decoratedType.GetProperties())
 			{
-				foreach (PropertyLevelMappedAttribute attrib in this.GetPropertyLevelMappingAttributes(prop))
+				foreach (PropertyLevelMappedAttribute attrib in prop.GetCachedAttributes<PropertyLevelMappedAttribute>(true))
 				{
-					if (attrib.GetType() != typeof(StormColumnMappedAttribute))
+					if (attrib.GetType() != typeof(StormColumnMappedAttribute) && attrib.GetType() != typeof(StormRelationMappedAttribute))
 						throw new StormConfigurationException("Invalid mapping on Type [" + decoratedType.FullName + "], Property [" + prop.Name + "]. Table Mapped classes can not contain Properties mapped with this mapping type."); 
 				}
 			}

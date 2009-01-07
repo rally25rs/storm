@@ -104,7 +104,7 @@ namespace Storm.DataBinders.Oracle.Validation
 			{
 				if (propMapping is StormParameterMappedAttribute)
 					ValidateParameterMapping(procedureArgumentsTable, (StormParameterMappedAttribute)propMapping);
-				else
+				else if (!(propMapping is StormRelationMappedAttribute))
 					throw new StormConfigurationException("Unhandled mapping type. Data Binder does not know how to handle the mapping [" + propMapping.GetType().FullName + "].");
 			}
 		}
@@ -149,24 +149,34 @@ namespace Storm.DataBinders.Oracle.Validation
 
 		private void ValidateTableMapping(StormTableMappedAttribute mapping)
 		{
-			DataTable schema = connection.GetSchema("Tables", new string[] { null, mapping.TableName });
+			string tableName = null, owner = null;
+			string[] parts = mapping.TableName.ToUpper().Split('.');
+			if (parts.Length == 2)
+			{
+				owner = parts[0];
+				tableName = parts[1];
+			}
+			else
+				tableName = parts[0];
+
+			DataTable schema = connection.GetSchema("Tables", new string[] { owner, tableName });
 			if (schema.Rows.Count == 0)
 				throw new StormConfigurationException("The table named [" + mapping.TableName + "] does not exist.");
 
-			string tableName = schema.Rows[0]["TABLE_NAME"].ToString();
+			tableName = schema.Rows[0]["TABLE_NAME"].ToString();
 
 			foreach (PropertyLevelMappedAttribute propMapping in mapping.PropertyAttributes)
 			{
 				if (propMapping is StormColumnMappedAttribute)
 					ValidateColumnMapping(tableName, (StormColumnMappedAttribute)propMapping);
-				else
+				else if (!(propMapping is StormRelationMappedAttribute))
 					throw new StormConfigurationException("Unhandled mapping type. Data Binder does not know how to handle the mapping [" + propMapping.GetType().FullName + "].");
 			}
 		}
 
 		private void ValidateColumnMapping(string tableName, StormColumnMappedAttribute mapping)
 		{
-			DataTable schema = connection.GetSchema("Columns", new string[] { null, tableName, mapping.ColumnName });
+			DataTable schema = connection.GetSchema("Columns", new string[] { null, tableName, mapping.ColumnName.ToUpper() });
 			if (schema.Rows.Count == 0)
 				throw new StormConfigurationException("The table named [" + tableName + "] does not contain a column named [" + mapping.ColumnName + "].");
 

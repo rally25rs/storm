@@ -11,7 +11,7 @@ namespace Storm.Attributes
     /// </summary>
     public class StormColumnMappedAttribute : PropertyLevelMappedAttribute
     {
-        public string ColumnName { get; set; }
+		public string ColumnName { get; set; }
 		public bool PrimaryKey { get; set; }
 
         /// <summary>
@@ -23,6 +23,9 @@ namespace Storm.Attributes
 
 		internal override void ValidateMapping(PropertyInfo decoratedProperty)
 		{
+			if (this.Validated)
+				return;
+
 			// base validation
 			base.ValidateMapping(decoratedProperty);
 			this.Validated = false;

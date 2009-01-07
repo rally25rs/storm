@@ -24,6 +24,9 @@ namespace Storm.Attributes
 
 		internal override void ValidateMapping(Type decoratedType)
 		{
+			if (this.Validated)
+				return;
+
 			// base validation
 			base.ValidateMapping(decoratedType);
 			this.Validated = false;
@@ -34,9 +37,9 @@ namespace Storm.Attributes
 
 			foreach (PropertyInfo prop in decoratedType.GetProperties())
 			{
-				foreach (PropertyLevelMappedAttribute attrib in this.GetPropertyLevelMappingAttributes(prop))
+				foreach (PropertyLevelMappedAttribute attrib in prop.GetCachedAttributes<PropertyLevelMappedAttribute>(true))
 				{
-					if (attrib.GetType() != typeof(StormParameterMappedAttribute))
+					if (attrib.GetType() != typeof(StormParameterMappedAttribute) && attrib.GetType() != typeof(StormRelationMappedAttribute))
 						throw new StormConfigurationException("Invalid mapping on Type [" + decoratedType.FullName + "], Property [" + prop.Name + "]. Procedure Mapped classes can not contain Properties mapped with this mapping type.");
 				}
 			}

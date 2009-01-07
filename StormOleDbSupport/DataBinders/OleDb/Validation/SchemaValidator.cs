@@ -41,7 +41,7 @@ namespace Storm.DataBinders.OleDb.Validation
 			{
 				if (propMapping is StormColumnMappedAttribute)
 					ValidateColumnMapping(tableCatalog, tableSchema, tableName, (StormColumnMappedAttribute)propMapping);
-				else
+				else if (!(propMapping is StormRelationMappedAttribute))
 					throw new StormConfigurationException("Unhandled mapping type. Data Binder does not know how to handle the mapping [" + propMapping.GetType().FullName + "].");
 			}
 		}

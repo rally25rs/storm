@@ -90,7 +90,9 @@ namespace Storm.DataBinders.OleDb
 			}
 
 			cmd.CommandType = System.Data.CommandType.Text;
-			cmd.CommandText = "SELECT " + columnsBuilder.ToString() + " FROM " + mapping.TableName + " WHERE " + keysBuilder.ToString();
+			cmd.CommandText = "SELECT " + columnsBuilder.ToString() + " FROM " + mapping.TableName;
+			if (keysBuilder.Length > 0)
+				cmd.CommandText += " WHERE " + keysBuilder.ToString();
 			
 			return cmd;
 		}
