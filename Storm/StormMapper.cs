@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
-using Storm.DataBinders;
-using Storm.Attributes;
 using System.Data;
-using System.Reflection.Emit;
+using System.Reflection;
+using Storm.Attributes;
+using Storm.DataBinders;
 
 namespace Storm
 {
@@ -12,18 +11,10 @@ namespace Storm
     /// This is the main class for Storm.
     /// StormMapper is used to load and persist objects.
     /// </summary>
-	public class StormMapper
+	public static class StormMapper
 	{
 		private static MethodInfo loadMethodInfo = null;
 		private static MethodInfo batchLoadMethodInfo = null;
-
-		/// <summary>
-		/// This class should not be instantiated. Use static methods instead.
-		/// TODO: Would be better to make a singleton and/or a factory.
-		/// </summary>
-		internal StormMapper()
-		{
-		}
 
 		/// <summary>
 		/// Take an instance of a Storm mapped class and load the
@@ -56,6 +47,9 @@ namespace Storm
 			IDataBinder binder = DataBinderFactory.GetDataBinder(connection.ConnectionString, attrib.DataBinder);
 			binder.ValidateMapping(attrib, connection);
 			binder.Load(instanceToLoad, attrib, connection, cascade);
+
+			if (instanceToLoad is IStormMapped)
+				((IStormMapped)instanceToLoad).StormLoaded();
 
 			if (cascade)
 				CascadeLoad(instanceToLoad, connection);
@@ -121,7 +115,12 @@ namespace Storm
 			if (cascade)
 			{
 				foreach (T instance in retList)
+				{
+					if (instance is IStormMapped)
+						((IStormMapped)instanceToLoad).StormLoaded();
+
 					CascadeLoad(instance, connection);
+				}
 			}
 
 			return retList;
@@ -140,6 +139,9 @@ namespace Storm
 		/// <param name="instanceToPersist">An instance of the class to persist. All key properties must be populated.</param>
 		public static void Persist<T>(T instanceToPersist, IDbConnection connection, bool cascade)
 		{
+			if (instanceToPersist is IStormMapped && !((IStormMapped)instanceToPersist).HasChangesToPersist)
+				return;
+
 			Type instanceType = instanceToPersist.GetType();
 			ClassLevelMappedAttribute attrib = GetMappingAttribute(instanceType);
 			if (attrib == null)

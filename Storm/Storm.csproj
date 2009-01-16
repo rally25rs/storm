@@ -43,7 +43,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AttributeDataManager.cs" />
     <Compile Include="Attributes\ClassLevelMappedAttribute.cs" />
     <Compile Include="Attributes\PropertyLevelMappedAttribute.cs" />
     <Compile Include="Attributes\StormColumnMappedAttribute.cs" />
@@ -54,9 +53,11 @@
     <Compile Include="DataBinders\AbstractDataBinder.cs" />
     <Compile Include="DataBinders\DataBinderFactory.cs" />
     <Compile Include="DataBinders\IDataBinder.cs" />
+    <Compile Include="IStormMapped.cs" />
     <Compile Include="MemberInfoExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StormConfigurationException.cs" />
+    <Compile Include="StormMapped.cs" />
     <Compile Include="StormMapper.cs" />
     <Compile Include="StormPersistenceException.cs" />
     <Compile Include="StormPersistenceEvents.cs" />
