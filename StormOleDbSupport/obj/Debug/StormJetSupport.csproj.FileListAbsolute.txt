@@ -1,7 +1,0 @@
-C:\Work\Storm\StormJetSupport\obj\Debug\ResolveAssemblyReference.cache
-C:\Work\Storm\StormJetSupport\bin\Debug\StormJetSupport.dll
-C:\Work\Storm\StormJetSupport\bin\Debug\StormJetSupport.pdb
-C:\Work\Storm\StormJetSupport\bin\Debug\Storm.dll
-C:\Work\Storm\StormJetSupport\bin\Debug\Storm.pdb
-C:\Work\Storm\StormJetSupport\obj\Debug\StormJetSupport.dll
-C:\Work\Storm\StormJetSupport\obj\Debug\StormJetSupport.pdb

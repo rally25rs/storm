@@ -30,7 +30,8 @@ namespace Storm.DataBinders.OleDb
 				TYPE_TO_DBTYPE_MAP = new Dictionary<Type, OleDbType>();
 				TYPE_TO_DBTYPE_MAP.Add(typeof(byte), OleDbType.UnsignedTinyInt);
 				TYPE_TO_DBTYPE_MAP.Add(typeof(byte[]), OleDbType.Binary);
-				TYPE_TO_DBTYPE_MAP.Add(typeof(char), OleDbType.Char);
+                TYPE_TO_DBTYPE_MAP.Add(typeof(bool), OleDbType.Boolean);
+                TYPE_TO_DBTYPE_MAP.Add(typeof(char), OleDbType.Char);
 				TYPE_TO_DBTYPE_MAP.Add(typeof(char[]), OleDbType.VarChar);
 				TYPE_TO_DBTYPE_MAP.Add(typeof(DateTime), OleDbType.Date);
 				TYPE_TO_DBTYPE_MAP.Add(typeof(TimeSpan), OleDbType.DBTime);
