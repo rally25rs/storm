@@ -5,8 +5,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Storm", "Storm\Storm.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StormOleDbSupport", "StormOleDbSupport\StormOleDbSupport.csproj", "{8D46DC5B-69C9-4044-832B-B79C3584E515}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestApp", "TestApp\TestApp.csproj", "{13A024E0-D3BD-4F32-B489-AAC0F0C6A648}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StormOracleSupport", "StormOracleSupport\StormOracleSupport.csproj", "{1EFD2D9C-B85E-48A3-B758-54C00D284F31}"
 EndProject
 Global
@@ -23,10 +21,6 @@ Global
 		{8D46DC5B-69C9-4044-832B-B79C3584E515}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8D46DC5B-69C9-4044-832B-B79C3584E515}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8D46DC5B-69C9-4044-832B-B79C3584E515}.Release|Any CPU.Build.0 = Release|Any CPU
-		{13A024E0-D3BD-4F32-B489-AAC0F0C6A648}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{13A024E0-D3BD-4F32-B489-AAC0F0C6A648}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{13A024E0-D3BD-4F32-B489-AAC0F0C6A648}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{13A024E0-D3BD-4F32-B489-AAC0F0C6A648}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1EFD2D9C-B85E-48A3-B758-54C00D284F31}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{1EFD2D9C-B85E-48A3-B758-54C00D284F31}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1EFD2D9C-B85E-48A3-B758-54C00D284F31}.Release|Any CPU.ActiveCfg = Release|Any CPU
